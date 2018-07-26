@@ -535,7 +535,7 @@ function getAPIData(url){
 //Intial Map to be Shown
 function initMap(){
     var options = {
-        zoom:15,
+        zoom:16,
     };
     var map = new google.maps.Map(document.getElementById('map'), options);
 }
@@ -550,7 +550,7 @@ function showMap(restaurant, home){ //pass a restaurant as parameter, use restau
     var homeLatLng = new google.maps.LatLng(home.lat, home.lng);
 
     var options = { 
-        zoom:15,
+        zoom:16,
         center:centerLatLng
     };
     //Map variable
@@ -701,6 +701,31 @@ function getRestaurantHours(googleObject){
     return googleObject.result["opening_hours"]["weekday_text"];
 }
 
+function printRestaurantInfo (restaurant, divID){
+    var div = document.getElementById(divID);
+    var walkingpersec = 1.4;
+    var drivingpersec = 16.67;
+    div.innerHTML += "Distance: "+Math.round(restaurant.distance/100)/10+" km "+"("+Math.ceil(restaurant.distance/walkingpersec/60)+" minute walk, "+Math.ceil(restaurant.distance/drivingpersec/60)+" mintute drive) <br>";
+    div.innerHTML += "Rating: "+restaurant.rating+"<br>";
+    div.innerHTML += "Address: "+restaurant.address+"<br>";
+
+    if(restaurant.openNow){
+        div.innerHTML += restaurant.name+" is open now. <br>";
+    }else{
+        div.innerHTML += restaurant.name+" is closed now.<br>";
+    }
+
+    //Match system day integer with corresponding index given by google
+    var d = new Date();
+    var day = d.getDay() - 1;
+    if(day == -1){
+        day = 7;
+    }
+
+    div.innerHTML += "Opening Hours for "+restaurant.openingHours[day]+"<br>";
+
+
+}
 
 
 //============================
@@ -760,6 +785,7 @@ function getInstaLocMediaURL(restaurant){
 
 function getExploreURL(restaurant){
     var url = "https://www.instagram.com/explore/locations/"+restaurant.instaID;
+    return url;
 }
 
 //Find closest match for location from a returned Location Search Endpoint JSON compared to LatLng returned from google
@@ -828,6 +854,22 @@ function videoDimensions(){
     return dimensions;
 }
 
+
+//Create Instagram IFrame
+function generateInstaFrame(divID, src){
+    var iframe = document.createElement("iframe");
+    iframe.setAttribute("src", src);
+    iframe.setAttribute("id", "instaFrame")
+
+    div = document.getElementById(divID);
+    div.appendChild(iframe);
+    document.getElementById("instaFrame").scrollTo(1000,1000)
+}
+
+//Bypass XFrame Limitations
+function bypassIframe(divID){
+
+}
 
 //GETTER FUNCTIONS for Instagram Places Search Endpoint Object Entry
 //Location ID
@@ -908,20 +950,25 @@ window.onload = function(){
                         myRestaurant.instaID = getInstaID(findMatchingEntry(locationSearchObject, myRestaurant));
 
                         //TESTING PURPOSES
-                        objectDiv.innerHTML += "<br>";  
-                        objectDiv.innerHTML += JSON.stringify(myRestaurant);
+                        //objectDiv.innerHTML += "<br>";  
+                        //objectDiv.innerHTML += JSON.stringify(myRestaurant);
+                        
+                        //Create Instagram IFrame
+                        console.log("hello");
+                        generateInstaFrame("instaImages", getExploreURL(myRestaurant));
+                        printRestaurantInfo(myRestaurant, "restaurant-info");
 
                         //!!ASYNC CHAIN #6: AJAX request to Instagram Endpoint (Recent Location Media), JSONP supported.
-                        $.ajax({
-                            url: getInstaLocMediaURL(myRestaurant),
-                            type: "GET",
-                            crossDomain: true,
-                            dataType: "jsonp",
-                            success: function(locationMediaObject){
-                                console.log(getInstaLocMediaURL(myRestaurant));
-                                console.log(locationMediaObject);
-                            }
-                        });
+                        // $.ajax({
+                        //     url: getInstaLocMediaURL(myRestaurant),
+                        //     type: "GET",
+                        //     crossDomain: true,
+                        //     dataType: "jsonp",
+                        //     success: function(locationMediaObject){
+                        //         console.log(getInstaLocMediaURL(myRestaurant));
+                        //         console.log(locationMediaObject);
+                        //     }
+                        // });
                     }
                 });
             });
