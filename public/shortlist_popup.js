@@ -768,16 +768,8 @@ function getFbPlacesSearchURL(restaurant){
 
 //Returns Instagram Token from Local Storage or default token if not found
 function getInstaToken(){
-    var url = window.location.href
-    var splitURL = url.split("?");
-    if(splitURL[0] == "http://127.0.0.1:5500/public/shortlist_popup.html"){
-        console.log("No token found.");
-        return "37737826.ddf68b9.6234ba6f1aca4dc087fe225d8466668d";
-    }
-    else{
-        console.log(this.sessionStorage.getItem("InstaToken"));
-        return this.sessionStorage.getItem("instaToken");
-    }
+    console.log(this.sessionStorage.getItem("instaToken"));
+    return this.sessionStorage.getItem("instaToken");
 }
 
 //Returns URL for Instagram Location Search Endpoint 

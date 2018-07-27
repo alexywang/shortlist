@@ -8,19 +8,61 @@ function instaAuth(){
     window.location.href = authURL;
 }
 
-window.onload = function(){
-    var url = window.location.href;
-    var splitURL = url.split("#access_token="); 
-    var token;
-    //If the first element of split is still the entire unsplit URL, the user has not authenticated yet, send to Instagram login
-    if(splitURL[1] == undefined && url.includes("shortlist")){
-        console.log(splitURL[0]);
-        console.log(splitURL[1]);
-        instaAuth();
-    }else{
-        token = splitURL[1];
-        //Store token in Session Storage
-        sessionStorage.setItem("instaToken", token);
+//Remove hash URL fragment with smooth reload, algorithm by Andy E on Stack Overflow
+function removeHash () { 
+    var scrollV, scrollH, loc = window.location;
+    if ("pushState" in history)
+        history.pushState("", document.title, loc.pathname + loc.search);
+    else {
+        // Prevent scrolling by storing the page's current scroll offset
+        scrollV = document.body.scrollTop;
+        scrollH = document.body.scrollLeft;
+
+        loc.hash = "";
+
+        // Restore the scroll offset, should be flicker free
+        document.body.scrollTop = scrollV;
+        document.body.scrollLeft = scrollH;
     }
 }
+
+function changeButtonState(buttonName, trueFalse){
+    var button = document.getElementById(buttonName);
+    button.disabled = trueFalse;
+}
+function changeButtonText(buttonName, newText){
+    var button = document.getElementById(buttonName);
+    button.innerHTML = newText;
+}
+
+window.onload = function(){
+    var url = window.location.href;
+    var instaToken;
+    var instaButtonID = "insta-button";
+    //Check if the user has Authenticated: Either an insta token is in the sessionStorage or the current url contains an access token hash
+    if(sessionStorage.instaToken && sessionStorage.getItem("instaToken") != undefined){
+        //User has already authenticated, disable the buttons
+        console.log("1");  
+        console.log(sessionStorage.getItem("instaToken"));
+        changeButtonState(instaButtonID, true);
+        changeButtonText(instaButtonID, "Logged In Successfully")
+        removeHash();
+    }else{
+        //User may have fully authenticated, split URL to check.
+        var splitURL = url.split("#access_token="); 
+        if(splitURL[1] !== undefined){
+            //User has just logged in, the access token is in the url
+            sessionStorage.setItem("instaToken",splitURL[1]);
+            console.log("2");
+            console.log(splitURL[1]);
+            removeHash();
+            changeButtonState(instaButtonID, true);
+            changeButtonText(instaButtonID, "Logged In Successfully")
+        }else{
+            //User has not logged in at all, ensure that button is enabled
+            console.log("3");
+            changeButtonState(instaButtonID, false);
+        }
+    }
+};
 
