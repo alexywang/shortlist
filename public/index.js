@@ -26,31 +26,43 @@ function removeHash () {
     }
 }
 
-function changeButton(buttonName, trueFalse){
+function changeButtonState(buttonName, trueFalse){
     var button = document.getElementById(buttonName);
     button.disabled = trueFalse;
+}
+function changeButtonText(buttonName, newText){
+    var button = document.getElementById(buttonName);
+    button.innerHTML = newText;
 }
 
 window.onload = function(){
     var url = window.location.href;
     var instaToken;
+    var instaButtonID = "insta-button";
     //Check if the user has Authenticated: Either an insta token is in the sessionStorage or the current url contains an access token hash
-    if(sessionStorage.instaToken || sessionStorage.getItem("instaToken") !== null){
+    if(sessionStorage.instaToken && sessionStorage.getItem("instaToken") != undefined){
         //User has already authenticated, disable the buttons
-        changeButton("insta-button", false);
+        console.log("1");  
+        console.log(sessionStorage.getItem("instaToken"));
+        changeButtonState(instaButtonID, true);
+        changeButtonText(instaButtonID, "Logged In Successfully")
         removeHash();
     }else{
         //User may have fully authenticated, split URL to check.
         var splitURL = url.split("#access_token="); 
-        if(splitURL[1] && splitURL[1] !== null){
+        if(splitURL[1] !== undefined){
             //User has just logged in, the access token is in the url
             sessionStorage.setItem("instaToken",splitURL[1]);
+            console.log("2");
+            console.log(splitURL[1]);
             removeHash();
-            changeButton("insta-button", false);
+            changeButtonState(instaButtonID, true);
+            changeButtonText(instaButtonID, "Logged In Successfully")
         }else{
             //User has not logged in at all, ensure that button is enabled
-            changeButton("insta-button", true);
+            console.log("3");
+            changeButtonState(instaButtonID, false);
         }
     }
-}
+};
 
