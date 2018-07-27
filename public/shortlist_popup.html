@@ -15,26 +15,7 @@
     </head>
 
     <body>
-        
-
-
-
-        <!GOOGLE MAPS API SETUP>
-        <!Map style> 
-        <style>
-            #map {
-                height: 400px;
-                width: 100%;
-            }
-
-            html, body{
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-        </style>
-
-        <!Source to API>
+        <!Source to GOOGLE MAPS API>
         <script async defer 
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8GJ9n0WqR2SXcDQUqxDBHIwbJ1bPA6YA&callback=initMap">
         </script>
@@ -61,26 +42,40 @@
 
           </script>
 
-
-
-
         <!My Javascript Code>
         <script type="text/javascript" src = "shortlist_popup.js"></script>
 
-        <!Restaurant Name displayed here>
-        <h1 align="center" id="restaurantName">
-        </h1>
-        
-        <!Container for the map>
-        <div id="map">   
+
+        <!ELEMENTS>
+
+        <!Search Bar>
+        <div id="search-bar">
+            <form>
+                <input type="text" name="restaurantName" placeholder="Search">
+            </form>
         </div>
 
-        <!Container for the returned data>
-        <div id="objectDiv">
-        </div>
+        <!Restaurant Name displayed here>
+        <h1 align="left" id="restaurantName">
+        </h1>
         
-        <!Container for Instagram Pictures>
-        <div id="instaPics">
+        <!Top Half Container>
+        <div id="api-container" align="center">
+            <!Div for Instagram Pictures>
+            <div id="instaImages">
+                <!IFrame generated here>
+            </div>
+
+            <!Div for Map>
+            <div id="map-container">
+                <div id="map">   
+                </div>
+            </div>
+        </div>
+
+        <div id ="info-container">
+            <div id="restaurant-info">
+            </div>
         </div>
 
     </body>
