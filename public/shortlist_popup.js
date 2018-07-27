@@ -625,6 +625,24 @@ function getDistance(pointA, pointB, callback){
     });
 }
 
+function getDistancePromise(pointA, pointB){
+    return new Promise(function(resolve,reject){
+        var directionsService = new google.maps.DirectionsService();
+        directionsService.route({
+            origin: {pointA},
+            destination: pointB,
+            travelMode: google.maps.TravelMode.WALKING
+        }, function(response, status){
+            if(status == google.maps.DirectionsStatus.OK){
+                directionsDisplay.setDirections(response);
+                resolve(Math.round(directionsDisplay.getDirections().routes[directionsDisplay.getRouteIndex()].legs[0].distance.value));
+            }else{
+                window.alert("Directions failed");   
+            }
+        });
+    });
+}
+
 //========================
 //GOOGLE PLACES ||          API KEY: AIzaSyA8GJ9n0WqR2SXcDQUqxDBHIwbJ1bPA6YA
 //========================
@@ -884,6 +902,75 @@ function getInstaID(matchingEntry){
 //==========================================================
 
 window.onload = function(){
+    //Initialize Restaurant and Home Objects
+    var restaurant = new Restaurant();
+    var home = new Home();
+
+    //Set home (Temporary Hardcode)
+    home.lat = 43.6534;
+    home.lng = -79.384293;
+    home.city = "Toronto";
+    home.postal = "M5H2N2";
+
+    //Get initially inputted restaurant name
+    restaurant.name = getInputtedName();
+
+    //Promise #1: HTTP Request to Google Places Text Search
+    getAPIData(getGoogleTextSearchURL(restaurant, home)).then(function(searchObj){
+        //Set values of Restaurant Object with resolved searchObj
+        restaurant.address = getRestaurantAddress(searchObj);
+        restaurant.lat = getRestaurantLat(searchObj);
+        restaurant.lng = getRestaurantLng(searchObj);
+        restaurant.rating = getRestaurantRating(searchObj);
+        restaurant.googleID = getRestaurantID(searchObj);
+        restaurant.openNow = getRestaurantOpenNow(searchObj);
+        restaurant.name = getRestaurantName(searchObj);
+        printRestaurantName(restaurant);
+
+        //Return Promise #2: HTTP Request to Google Places Detail
+        return getAPIData(getGoogleDetailsURL(restaurant));
+    }).then(function(detailsObj){
+        //Set more values of Restaurant Object with detailsObj
+        restaurant.openingHours = getRestaurantHours(detailsObj);
+        
+        //Use data from restaurant and home objects to draw the map
+        showMap(restaurant, home);
+
+        //Return Promise #3: Directions Service
+        return new Promise(function(resolve, reject){
+            getDistance(new google.maps.LatLng(home.lat, home.lng), new google.maps.LatLng(restaurant.lat, restaurant.lng), function(dist){
+                resolve(dist);
+            });
+        });
+    }).then(function(dist){
+        //Set distance value with returned dist
+        restaurant.distance = dist;
+        
+        //Return Promise #4: AJAX Req to Instagram Location Search Endpoint
+        return new Promise(function(resolve, reject){
+            $.ajax({
+                url: getInstaLocSearchURL(restaurant),
+                type: "GET",
+                crossDomain: true,
+                dataType: "jsonp",
+                success: function(locSearchObj){
+                    resolve(locSearchObj);
+                }
+            });
+        });
+    }).then(function(locSearchObj){
+        //Set Instagram ID with resolved locSearchObj
+        restaurant.instaID = getInstaID(findMatchingEntry(locSearchObj, restaurant));
+
+        //Create Instagram IFrame
+        generateInstaFrame("instaImages", getExploreURL(restaurant));
+        //Print restaurant info using restaurant object in restaurant-info div below Instagram and Maps.
+        printRestaurantInfo(restaurant, "restaurant-info");
+    });
+
+}
+
+function oldMain(){
     var myRestaurant = new Restaurant();
     var myHome = new Home();
 
@@ -975,4 +1062,3 @@ window.onload = function(){
         });
     });
 }
-
