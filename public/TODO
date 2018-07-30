@@ -1,0 +1,9 @@
+Short Term:
+1. findMatchingEntries() is too unreliable, needs update or switch to Facebook API first 
+2. Move printed restaurnt information into Google Maps Markers
+3. Automatic Get Current Location
+
+
+Long Term:
+1. Update to server-side scripting
+2. Auto-Complete Restaurant Names for easier searching

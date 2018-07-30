@@ -490,9 +490,34 @@ function Restaurant(){
 
 //Go to URL and parse the restaurant's name, return it. 
 function getInputtedName(){
-    var uncleanName = window.location.href.split('=')[1];
+    var uncleanName = window.location.href.split('?')[1];
+    uncleanName = uncleanName.split("&")[0];
+    uncleanName = uncleanName.split("=")[1];
     var parameterReg = /\+/gi; //replace all + with blank space
     return uncleanName.replace(parameterReg, " ");
+}
+
+//Go to URL and parse postal code, if nothing is there, use most recent postal code 
+function getInputtedPostal(){
+    var unclean = window.location.href.split("?")[1];
+    unclean = unclean.split("&")[1];
+    unclean = unclean.split("=")[1];
+    //Check if postal code was entered
+    if(unclean !== ""){
+        //Postal Code entered, clean it up, save and return
+        var parameterReg = /\+/gi; //replace all + with blank space
+        var postalCode = unclean.replace(parameterReg, " ");
+        sessionStorage.setItem("shortlist-postal", postalCode);
+        return postalCode;
+    }else if(sessionStorage.postalCode && sessionStorage.getItem("shortlist-postal") !== undefined){
+        //Postal code not found, but recently entered is found
+        return sessionStorage.getItem("shortlist-postal");
+    }else{
+        //Nothing found, send back to index
+        window.alert("Please enter a postal code.");
+        window.location.href = "index.html";
+    }
+    
 }
 
 //Print the restaurant name on the HTML code 
@@ -525,6 +550,20 @@ function getAPIData(url){
          
     });
     
+}
+
+//Get current location in Lat and Lng
+function getCurrentLocation(){
+    return new Promise(function(resolve, reject){
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(function(position){
+                resolve(position);
+            });
+        }else{
+            window.alert("Geolocation is not supported by this browser.");
+        }
+    });
+   
 }
 
 
@@ -682,6 +721,16 @@ function getGoogleDetailsURL(restaurant){
     return url;
 }
 
+//Returns a URL for Google Geocoder API
+function getGeocoderURL(obj){
+    var url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+obj.lat+"+"+obj.lng;
+    return url;
+}
+
+function parsePostalCode(geocoderObj){  
+    var lastIndex = geocoderObj.results[0].address_components.length-1;
+    return geocoderObj.results[0].address_components[lastIndex].short_name;
+};  
 
 
 //FOLLOWING FUNCTIOJNS use JSON returned by the Places Search to return certain values
@@ -907,9 +956,23 @@ window.onload = function(){
     //Get initially inputted restaurant name
     restaurant.name = getInputtedName();
 
-    //Promise #1: HTTP Request to Google Places Text Search
-    getAPIData(getGoogleTextSearchURL(restaurant, home)).then(function(searchObj){
-        //Set values of Restaurant Object with resolved searchObj
+    //Promise: Get Home Lat Lng with built-in HTML geocoder
+    getCurrentLocation().then(function(position){
+        console.log(position);
+        //Set Home LatLng
+        home.lat = position.coords.latitude;
+        home.lng = position.coords.longitude;
+        //Return Promise: Get Home Postal Code Using Google Maps API Geocoder
+        return getAPIData(getGeocoderURL(home));
+    }).then(function(geocoderObj){
+        //Set Home Postal Code
+        console.log(geocoderObj);
+        home.postal = parsePostalCode(geocoderObj);
+        console.log(home.postal);
+        //Promise: HTTP REquest to Google Places Text Search
+        return getAPIData(getGoogleTextSearchURL(restaurant, home));
+    }).then(function(searchObj){
+        //Set values of Restaurant Object with resolved 
         restaurant.address = getRestaurantAddress(searchObj);
         restaurant.lat = getRestaurantLat(searchObj);
         restaurant.lng = getRestaurantLng(searchObj);
@@ -952,6 +1015,8 @@ window.onload = function(){
         });
     }).then(function(locSearchObj){
         //Set Instagram ID with resolved locSearchObj
+        console.log(locSearchObj);
+        console.log(findMatchingEntry(locSearchObj, restaurant));
         restaurant.instaID = getInstaID(findMatchingEntry(locSearchObj, restaurant));
 
         //Create Instagram IFrame
