@@ -39,12 +39,14 @@ window.onload = function(){
     var url = window.location.href;
     var instaToken;
     var instaButtonID = "insta-button";
+    var submitButtonID = "submit-button";
     //Check if the user has Authenticated: Either an insta token is in the sessionStorage or the current url contains an access token hash
     if(sessionStorage.instaToken && sessionStorage.getItem("instaToken") != undefined){
         //User has already authenticated, disable the buttons
         console.log("1");  
         console.log(sessionStorage.getItem("instaToken"));
         changeButtonState(instaButtonID, true);
+        changeButtonState(submitButtonID, false);
         changeButtonText(instaButtonID, "Logged In Successfully")
         removeHash();
     }else{
@@ -57,11 +59,13 @@ window.onload = function(){
             console.log(splitURL[1]);
             removeHash();
             changeButtonState(instaButtonID, true);
+            changeButtonState(submitButtonID, false);
             changeButtonText(instaButtonID, "Logged In Successfully")
         }else{
             //User has not logged in at all, ensure that button is enabled
             console.log("3");
             changeButtonState(instaButtonID, false);
+            changeButtonState(submitButtonID, true);
         }
     }
 };
