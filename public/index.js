@@ -1,3 +1,5 @@
+
+
 //Authenticate for Instagram API, token is returned as URL fragment
 function instaAuth(){
     var key = "ddf68b9a766f47479db62c4be4cb349f";
