@@ -10,14 +10,17 @@
         <!CSS Link>
         <link rel = "stylesheet" href = "./shortlist_popup.css">
 
-        
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
     </head>
 
     <body>
+
+
         <!Source to GOOGLE MAPS API>
         <script async defer 
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8GJ9n0WqR2SXcDQUqxDBHIwbJ1bPA6YA&callback=initMap">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8GJ9n0WqR2SXcDQUqxDBHIwbJ1bPA6YA&callback=initMap&libraries=places">
         </script>
 
         <!FACEBOOK API SETUP>
@@ -51,10 +54,7 @@
         <!Search Bar>
         <div id="search-bar">
             <form>
-                <input type="text" name="restaurantName" placeholder="Restaurant Name"> <br>
-                
-                <input type="text" name="postalCode" placeholder="Postal Code"><br>
-
+                <input type="text" name="restaurantName" placeholder="Restaurant Name" padding-right="1%">
                 <input type="submit" value="Get Details" id="submit-button"><br>
             </form>
         </div>
